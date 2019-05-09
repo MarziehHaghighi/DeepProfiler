@@ -18,8 +18,10 @@ def openImage(paths, outlines):
         #img[:,:,c] = (channels[c] - max_value) / max_value
         img[:,:,c] = channels[c]
     if outlines is not None:
+        #         print(outlines)
         boundaries = skimage.io.imread(outlines)
         labels = skimage.measure.label(boundaries, background=1)
+#         print(img.shape,boundaries.shape,labels.shape)
         img = np.concatenate( (img, labels[:,:,np.newaxis]), axis=2)
     return img
 

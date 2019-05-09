@@ -43,7 +43,13 @@ class Metadata():
         print("Reading metadata form", filename)
         delimiter = parse_delimiter(delim)
         # Read csv files as strings without dropping NA symbols
-        self.data = pd.read_csv(filename, delimiter, dtype=dtype, keep_default_na=False)
+#         self.data = pd.read_csv(filename, delimiter, dtype=dtype, keep_default_na=False) # commented by Marz
+        dff = pd.read_csv(filename, delimiter, dtype=dtype, keep_default_na=False) # Marz
+        if mode=='training': # Marz
+            self.data=dff[dff['Replicate']!=3];# Marz
+        if mode=='testing': # Marz
+            self.data=dff[dff['Replicate']==3];# Marz
+
 
     def loadMultiple(self, filename, delim, dtype):
         frames = []
@@ -53,7 +59,14 @@ class Metadata():
                 csvPath = line.replace("\n","")
                 print("Reading from", csvPath)
                 frames.append( pd.read_csv(csvPath, delimiter, dtype=dtype, keep_default_na=False) )
-        self.data = pd.concat(frames)
+#         self.data = pd.concat(frames)# commented by Marz
+        
+        dff = pd.concat(frames)# Marz
+        if mode=='training':# Marz
+            self.data=dff[dff['Replicate']!=3];# Marz
+        if mode=='testing': # Marz
+            self.data=dff[dff['Replicate']==3];   # Marz
+            
         print("Multiple CSV files loaded")
 
     def filterRecords(self, filteringRule, copy=False):
@@ -67,8 +80,10 @@ class Metadata():
     def splitMetadata(self, trainingRule, validationRule):
         self.train = self.data[trainingRule(self.data)].copy()
         self.val = self.data[validationRule(self.data)].copy()
+        self.test = self.data[testingRule(self.data)].copy() #Marz
 
     def mergeOutlines(self, outlines_df):
         result = pd.merge(self.data, outlines_df, on=["Metadata_Plate", "Metadata_Well", "Metadata_Site"])
+        results=result.drop_duplicates().reset_index(drop=True) # Marz
         print("Metadata merged with Outlines")
         self.data = result

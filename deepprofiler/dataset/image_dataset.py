@@ -21,10 +21,12 @@ class ImageDataset():
 
     def getImagePaths(self, r):
         key = self.keyGen(r)
-        image = [self.root + "/" + r[ch] for ch in self.channels]
+        image = [self.root + "/" + r[ch] for ch in self.channels] # commented by Marz
+        image = [r[ch] for ch in self.channels]    #Marz
         outlines = self.outlines
         if outlines is not None:
-            outlines = self.outlines + r["Outlines"]
+#             outlines = self.outlines + r["Outlines"] # commented by Marz
+            outlines = r["Outlines"] # Marz
         return (key, image, outlines)
 
     def sampleImages(self, sampling_values, nImgCat):
@@ -35,6 +37,7 @@ class ImageDataset():
         for c in sampling_values:
             mask = self.meta.train[self.sampling_field] == c
             rec = self.meta.train[mask].sample(n=nImgCat, replace=True)
+#             rec.to_csv('/storage/data/marziehhaghighi/Mito/test-temp/rec.csv',index=False) #Marz
             for i, r in rec.iterrows():
                 key, image, outl = self.getImagePaths(r)
                 keys.append(key)
@@ -82,6 +85,8 @@ class ImageDataset():
             frame = self.meta.data.iterrows()
         elif frame == "val":
             frame = self.meta.val.iterrows()
+        elif frame == "test":   # Marz
+            frame = self.meta.test.iterrows()            
         else:
             frame = self.meta.train.iterrows()
 
@@ -102,22 +107,27 @@ class ImageDataset():
             return len(self.meta.val)
         elif dataset == "train":
             return len(self.meta.train)
+        elif dataset == "test": # Marz
+            return len(self.test.data)
         else:
             return 0
 
     def add_target(self, new_target):
         self.targets.append(new_target)
 
-def read_dataset(config):
+# def read_dataset(config):
+def read_dataset(config,modee):  # Marz
     # Read metadata and split dataset in training and validation
     metadata = deepprofiler.dataset.metadata.Metadata(config["paths"]["index"], dtype=None)
 
     # Add outlines if specified
     outlines = None
     if "outlines" in config["prepare"].keys() and config["prepare"]["outlines"] != "":
-        df = pd.read_csv(config["paths"]["metadata"] + "/outlines.csv")
+#         df = pd.read_csv(config["paths"]["metadata"] + "/outlines.csv")# commented by Marz
+        df = pd.read_csv(config["prepare"]["outlines"]["paths"] + "/outlines.csv") # Marz
         metadata.mergeOutlines(df)
-        outlines = config["paths"]["root"] + "inputs/outlines/"
+#         outlines = config["paths"]["root"] + "inputs/outlines/"  # commented by Marz
+        outlines = config["prepare"]["outlines"]["paths"] # Marz
 
     print(metadata.data.info())
 
@@ -125,7 +135,9 @@ def read_dataset(config):
     split_field = config["train"]["dset"]["split_field"]
     trainingFilter = lambda df: df[split_field].isin(config["train"]["dset"]["training_values"])
     validationFilter = lambda df: df[split_field].isin(config["train"]["dset"]["validation_values"])
-    metadata.splitMetadata(trainingFilter, validationFilter)
+    testingFilter = lambda df: df[split_field].isin(config["train"]["dset"]["testing_values"]) # Marz
+#     metadata.splitMetadata(trainingFilter, validationFilter,testingFilter)   # commented by Marz
+    metadata.splitMetadata(trainingFilter, validationFilter,testingFilter) # Marz
 
     # Create a dataset
     keyGen = lambda r: "{}/{}-{}".format(r["Metadata_Plate"], r["Metadata_Well"], r["Metadata_Site"])
@@ -137,10 +149,22 @@ def read_dataset(config):
         keyGen
     )
 
-    # Add training targets
-    for t in config["train"]["dset"]["targets"]:
-        new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, metadata.data[t].unique())
-        dset.add_target(new_target)
+#     # Add training targets commented by Marz
+#     for t in config["train"]["dset"]["targets"]:
+#         new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, metadata.data[t].unique())
+#         dset.add_target(new_target)
+
+#     # Add training targets        Marz
+    if modee=='training':
+        for t in config["train"]["dset"]["targets"]:
+    #         new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, metadata.data[t].unique())
+            new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, metadata.data[t].unique())
+            dset.add_target(new_target)
+    if modee=='testing':
+        for t in config["train"]["dset"]["targets"]:
+    #         new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, metadata.data[t].unique())
+            new_target = deepprofiler.dataset.target.MetadataColumnTarget(t, [0,1])        
+        
 
     # Activate outlines for masking if needed
     if config["train"]["dset"]["mask_objects"]:

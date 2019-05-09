@@ -155,7 +155,26 @@ def profile(context, part):
     metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"])
     deepprofiler.learning.profiling.profile(context.obj["config"], metadata)
     
+# Fourth tool: Apply the learned model on test data and generate output (Marz)
+@cli.command()
+@click.pass_context
+@click.option("--part",
+              help="Part of index to process", 
+              default=-1, 
+              type=click.INT)
+def testmodel(context, part):
+    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locations"][:-1]+'Test/'
+    if context.parent.obj["config"]["prepare"]["compression"]["implement"]:
+        context.parent.obj["config"]["paths"]["index"] = context.obj["config"]["paths"]["compressed_metadata"]+"/compressed.csv"
+        context.parent.obj["config"]["paths"]["images"] = context.obj["config"]["paths"]["compressed_images"]
+    config = context.obj["config"]
+    if part >= 0:
+        partfile = "index-{0:03d}.csv".format(part)
+        config["paths"]["index"] = context.obj["config"]["paths"]["index"].replace("index.csv", partfile)
+    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'testing')
+    deepprofiler.learning.testingmodel.testmodel(context.obj["config"], metadata)
 
+    
 # Auxiliary tool: Split index in multiple parts
 @cli.command()
 @click.pass_context

@@ -10,6 +10,8 @@ import deepprofiler.dataset.utils
 import deepprofiler.imaging.augmentations
 import deepprofiler.imaging.boxes
 
+
+
 def crop_graph(image_ph, boxes_ph, box_ind_ph, mask_ind_ph, box_size, mask_boxes=False):
     with tf.variable_scope("cropping"):
         crop_size_ph = tf.constant([box_size, box_size], name="crop_size")
@@ -285,7 +287,9 @@ class SingleImageCropGenerator(CropGenerator):
         if sample_first_crops and self.batch_size < len(batch["locations"][0]):
             batch["locations"][0] = batch["locations"][0].head(self.batch_size)
 
-        has_orientation = len(batch["locations"][0].columns) > 2
+#         has_orientation = len(batch["locations"][0].columns) > 2
+        has_orientation = len(batch["locations"][0].columns[batch["locations"][0].columns.str.contains('Oreintation')]) > 0  #Marz
+        
         boxes, box_ind, targets, mask_ind = deepprofiler.imaging.boxes.prepare_boxes(batch, self.config)
         batch["images"] = np.reshape(image_array, self.input_variables["shapes"]["batch"])
         feed_dict = {
