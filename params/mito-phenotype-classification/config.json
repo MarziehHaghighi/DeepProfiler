@@ -51,7 +51,8 @@
                 "batch_size": 4,
                 "conv_blocks": 3,
                 "feature_dim": 50
-            }
+            },
+        "initModelByPretrained":false
         },
         "sampling": {
             "images": 20,
