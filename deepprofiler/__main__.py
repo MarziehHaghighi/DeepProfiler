@@ -37,6 +37,7 @@ def cli(context, root, config, cores):
         "metadata": root+"/inputs/metadata/",
         "preprocessed": root+"/inputs/preprocessed/",
         "pretrained": root+"/inputs/pretrained/",
+        "initWeights": root+"/inputs/initWeights/",
         "intensities": root+"/outputs/intensities/",
         "compressed_images": root+"/outputs/compressed/images/",
         "compressed_metadata": root+"/outputs/compressed/metadata/",

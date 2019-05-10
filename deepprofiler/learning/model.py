@@ -150,7 +150,7 @@ def load_weights(dpmodel, epoch):
         # Initialize all tf variables to avoid tf bug
 #         keras.backend.get_session().run(tf.global_variables_initializer()) #commented by Marz
         if dpmodel.config["train"]["model"]["initModelByPretrained"]: # Marz
-            pretrained_model=dpmodel.config["paths"]["pretrained"] + os.listdir(dpmodel.config["paths"]["pretrained"])[0]
+            pretrained_model=dpmodel.config["paths"]["initWeights"] + os.listdir(dpmodel.config["paths"]["initWeights"])[0]
             print('Model starts from: '+pretrained_model)# Marz
             dpmodel.feature_model.load_weights(pretrained_model)# Marz
         else:

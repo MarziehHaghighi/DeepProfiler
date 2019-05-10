@@ -21,9 +21,9 @@
             "implement": false,
             "scaling_factor": 1
         },
-	"outlines":{
-		"paths":"/storage/data/marziehhaghighi/Mito/"
-	}
+        "outlines":{
+            "paths":"/storage/data/marziehhaghighi/Mito/"
+        }
     },
     "train": {           
         "gpus": "0",
