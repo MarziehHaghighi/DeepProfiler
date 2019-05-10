@@ -118,7 +118,7 @@ class ImageDataset():
 # def read_dataset(config):
 def read_dataset(config,modee):  # Marz
     # Read metadata and split dataset in training and validation
-    metadata = deepprofiler.dataset.metadata.Metadata(config["paths"]["index"], dtype=None)
+    metadata = deepprofiler.dataset.metadata.Metadata(modee,config["paths"]["index"], dtype=None) #Marz
 
     # Add outlines if specified
     outlines = None

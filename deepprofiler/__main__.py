@@ -131,10 +131,14 @@ def optimize(context, epoch, seed):
 @click.option("--seed", default=None)
 @click.pass_context
 def train(context, epoch, seed):
+    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locations"][:-1]+'Train/'
     if context.parent.obj["config"]["prepare"]["compression"]["implement"]:
         context.parent.obj["config"]["paths"]["index"] = context.obj["config"]["paths"]["compressed_metadata"]+"/compressed.csv"
         context.parent.obj["config"]["paths"]["images"] = context.obj["config"]["paths"]["compressed_images"]
-    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"])
+                                                                               
+#     metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"]) #
+                                                                               
+    metadata =deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'training') #Marz
     deepprofiler.learning.training.learn_model(context.obj["config"], metadata, epoch, seed)
 
 
@@ -172,7 +176,7 @@ def testmodel(context, part):
     if part >= 0:
         partfile = "index-{0:03d}.csv".format(part)
         config["paths"]["index"] = context.obj["config"]["paths"]["index"].replace("index.csv", partfile)
-    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'testing')
+    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'testing') #Marz
     deepprofiler.learning.testingmodel.testmodel(context.obj["config"], metadata)
 
     
