@@ -216,10 +216,26 @@ class CropGenerator(object):
             time.sleep(2)
         np.random.shuffle(pool_index) #TODO
         idx = pool_index[0:self.config["train"]["model"]["params"]["batch_size"]]
+#         print('idx',idx)
         # TODO: make outputs for all targets
         data = [self.image_pool[idx,...], self.label_pool[0][idx,:], 0]
         return data
 
+    def sample_batch2domains(self, pool_index):
+        while not self.ready_to_sample:
+            time.sleep(2)
+        np.random.shuffle(pool_index) #TODO 
+#         print(self.label_pool,self.dset.targets)
+        pool_indexA=[pool_index[i] for i in range(len(pool_index)) if self.label_pool[0][i,0]==0]
+        pool_indexB=[pool_index[i] for i in range(len(pool_index)) if self.label_pool[0][i,0]==1]
+        idxA = pool_indexA[0:self.config["train"]["model"]["params"]["batch_size"]]
+        idxB = pool_indexB[0:self.config["train"]["model"]["params"]["batch_size"]]
+#         print('idxA',idxA)
+#         print('idxB',idxB)
+        # TODO: make outputs for all targets
+#         data = [self.image_pool[idx,...], self.label_pool[0][idx,:], 0]
+        data = [self.image_pool[idxA,...], self.image_pool[idxB,...], 0]
+        return data    
 
     def generate(self, sess, global_step=0):
         pool_index = np.arange(self.image_pool.shape[0])
@@ -236,6 +252,28 @@ class CropGenerator(object):
 
             yield (data[0], data[1:-1])
 
+    def generate2domains(self, sess, global_step=0):
+        pool_index = np.arange(self.image_pool.shape[0])
+        while True:
+            if self.coord.should_stop():
+                break
+            data = self.sample_batch2domains(pool_index)
+#             data = self.sample_batch(pool_index)
+#             print(len(data[0])) # 4
+#             print(data[0].shape) #(4, 512, 512, 1)
+#             print(len(data[1])) # 4
+#             print(data[1].shape)         
+        
+            # Indices of data => [0] images, [1:-1] targets, [-1] summary
+            #ms = data[-1]
+
+            global_step += 1
+            #if global_step % 10 == 0:
+            #    self.summary_writer.add_summary(ms, global_step)
+
+            yield (data[0], data[1])            
+            
+            
     def stop(self, session):
         self.coord.request_stop()
         self.coord.join(self.queue_threads)

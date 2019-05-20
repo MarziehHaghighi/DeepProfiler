@@ -31,7 +31,9 @@ import deepprofiler.download.normalize_bbbc021_metadata
 def cli(context, root, config, cores):
     dirs = {
         "root": root,
-        "locations": root+"/inputs/locations/",  # TODO: use os.path.join()
+#         "locations": root+"/inputs/locations/",  # TODO: use os.path.join() commented by Marz
+        "locationsTrain": root+"/inputs/locationsTrain/",  # TODO: use os.path.join() Marz
+        "locationsTest": root+"/inputs/locationsTest/",  # TODO: use os.path.join()   Marz 
         "config": root+"/inputs/config/",
         "images": root+"/inputs/images/",
         "metadata": root+"/inputs/metadata/",
@@ -131,14 +133,11 @@ def optimize(context, epoch, seed):
 @click.option("--seed", default=None)
 @click.pass_context
 def train(context, epoch, seed):
-    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locations"][:-1]+'Train/'
+    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locationsTrain"]#[:-1]+'Train/'
     if context.parent.obj["config"]["prepare"]["compression"]["implement"]:
         context.parent.obj["config"]["paths"]["index"] = context.obj["config"]["paths"]["compressed_metadata"]+"/compressed.csv"
         context.parent.obj["config"]["paths"]["images"] = context.obj["config"]["paths"]["compressed_images"]
-                                                                               
-#     metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"]) #
-                                                                               
-    metadata =deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'training') #Marz
+    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'training')
     deepprofiler.learning.training.learn_model(context.obj["config"], metadata, epoch, seed)
 
 
@@ -168,7 +167,8 @@ def profile(context, part):
               default=-1, 
               type=click.INT)
 def testmodel(context, part):
-    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locations"][:-1]+'Test/'
+#     context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locations"][:-1]+'Test/'
+    context.parent.obj["config"]["paths"]["locations"]=context.parent.obj["config"]["paths"]["locationsTest"]
     if context.parent.obj["config"]["prepare"]["compression"]["implement"]:
         context.parent.obj["config"]["paths"]["index"] = context.obj["config"]["paths"]["compressed_metadata"]+"/compressed.csv"
         context.parent.obj["config"]["paths"]["images"] = context.obj["config"]["paths"]["compressed_images"]
@@ -176,7 +176,7 @@ def testmodel(context, part):
     if part >= 0:
         partfile = "index-{0:03d}.csv".format(part)
         config["paths"]["index"] = context.obj["config"]["paths"]["index"].replace("index.csv", partfile)
-    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'testing') #Marz
+    metadata = deepprofiler.dataset.image_dataset.read_dataset(context.obj["config"],'testing')
     deepprofiler.learning.testingmodel.testmodel(context.obj["config"], metadata)
 
     

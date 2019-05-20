@@ -175,7 +175,7 @@ def setup_params(dpmodel, experiment):
     steps = dpmodel.config["train"]["model"]["steps"]
     if dpmodel.config["train"]["comet_ml"]["track"]:
         params = dpmodel.config["train"]["model"]["params"]
-        experiment.log_multiple_params(params)
+        experiment.log_parameters(params)
     return epochs, steps
 
 

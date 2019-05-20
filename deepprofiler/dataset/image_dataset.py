@@ -21,7 +21,7 @@ class ImageDataset():
 
     def getImagePaths(self, r):
         key = self.keyGen(r)
-        image = [self.root + "/" + r[ch] for ch in self.channels] # commented by Marz
+#         image = [self.root + "/" + r[ch] for ch in self.channels] # commented by Marz
         image = [r[ch] for ch in self.channels]    #Marz
         outlines = self.outlines
         if outlines is not None:

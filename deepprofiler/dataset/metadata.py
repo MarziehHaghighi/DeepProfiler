@@ -32,14 +32,14 @@ class Metadata():
 
     # The dtype argument indicates whether the dataset should be read as strings (object)
     # or according to the dataset type (None)
-    def __init__(self, filename=None, csvMode="single", delimiter="default", dtype=object):
+    def __init__(self,mode, filename=None, csvMode="single", delimiter="default", dtype=object):
         if filename is not None:
             if csvMode == "single":
-                self.loadSingle(filename, delimiter, dtype)
+                self.loadSingle(filename, delimiter, dtype,mode)
             elif csvMode == "multi":
-                self.loadMultiple(filename, delimiter, dtype)
+                self.loadMultiple(filename, delimiter, dtype,mode)
 
-    def loadSingle(self, filename, delim, dtype):
+    def loadSingle(self, filename, delim, dtype,mode):
         print("Reading metadata form", filename)
         delimiter = parse_delimiter(delim)
         # Read csv files as strings without dropping NA symbols
@@ -51,7 +51,7 @@ class Metadata():
             self.data=dff[dff['Replicate']==3];# Marz
 
 
-    def loadMultiple(self, filename, delim, dtype):
+    def loadMultiple(self, filename, delim, dtype,mode):
         frames = []
         delimiter = parse_delimiter(delim)
         with open(filename, "r") as filelist:
@@ -77,7 +77,7 @@ class Metadata():
         else:
             self.data = self.data.loc[filteringRule(self.data), :]
 
-    def splitMetadata(self, trainingRule, validationRule):
+    def splitMetadata(self, trainingRule, validationRule,testingRule):
         self.train = self.data[trainingRule(self.data)].copy()
         self.val = self.data[validationRule(self.data)].copy()
         self.test = self.data[testingRule(self.data)].copy() #Marz
